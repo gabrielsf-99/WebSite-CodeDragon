@@ -44,6 +44,14 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        // Dragon Theme Colors
+        "dragon-dark": "var(--dragon-dark)",
+        "fire-orange": "var(--fire-orange)",
+        "fire-red": "var(--fire-red)",
+        "fire-magenta": "var(--fire-magenta)",
+        "circuit-blue": "var(--circuit-blue)",
+        "circuit-green": "var(--circuit-green)",
+        "dragon-gold": "var(--dragon-gold)",
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",
