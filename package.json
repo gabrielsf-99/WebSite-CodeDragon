@@ -4,6 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "build": "npm run vercel-build",
     "build:client": "vite build",
     "build:server": "esbuild server/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:vite --external:rollup --external:@rollup/*",
     "vercel-build": "npm run build:client && npm run build:server"
