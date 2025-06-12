@@ -1,69 +1,56 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes.ts";
-import { setupVite, serveStatic, log } from "./vite.ts";
+// server/index.ts
+import express from 'express'
+import path from 'path'
+import fs from 'fs'
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+async function startServer() {
+  const app = express()
+  let viteDevServer: any
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
-(async () => {
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+  if (process.env.NODE_ENV !== 'production') {
+    // só importa o Vite em dev
+    const { createServer } = await import('vite')
+    viteDevServer = await createServer({
+      server: { middlewareMode: 'ssr' }
+    })
+    app.use(viteDevServer.middlewares)
   } else {
-    serveStatic(app);
+    // em prod, serve só os estáticos gerados
+    app.use('/', express.static(path.resolve(__dirname, 'public')))
   }
 
-  // Para Vercel, não usar server.listen() - a Vercel gerencia isso
-  if (process.env.NODE_ENV === "development") {
-    const port = process.env.PORT || 8080;
-    server.listen(port, () => {
-      console.log(`Server running on http://localhost:${port}`);
-    });
-  }
-})();
+  app.use('*', async (req, res) => {
+    try {
+      let template: string
+      if (process.env.NODE_ENV !== 'production') {
+        template = await viteDevServer.transformIndexHtml(
+          req.originalUrl,
+          fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8')
+        )
+      } else {
+        template = fs.readFileSync(
+          path.resolve(__dirname, 'public/index.html'),
+          'utf8'
+        )
+      }
 
-// Exporta o app para a Vercel
-export default app;
+      // importe aqui seu entry-server roteado
+      const { render } = await import('./server/entry-server.js')
+      const appHtml = await render(req.originalUrl)
+
+      const html = template.replace(`<!--ssr-outlet-->`, appHtml)
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+    } catch (e: any) {
+      viteDevServer?.ssrFixStacktrace(e)
+      console.error(e)
+      res.status(500).end(e.message)
+    }
+  })
+
+  const port = process.env.PORT || 3000
+  app.listen(port, () => {
+    console.log(`> Server running on http://localhost:${port}`)
+  })
+}
+
+startServer()
