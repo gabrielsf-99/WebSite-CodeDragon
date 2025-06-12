@@ -1,5 +1,5 @@
+
 {
-  "version": 2,
   "builds": [
     {
       "src": "dist/index.js",
@@ -12,21 +12,16 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/dist/index.js"
-    },
-    {
       "src": "/assets/(.*)",
       "dest": "/dist/public/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "/dist/public/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/dist/index.js"
     }
-  ],
-  "functions": {
-    "dist/index.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
