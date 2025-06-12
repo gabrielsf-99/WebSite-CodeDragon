@@ -32,7 +32,7 @@ export default function HeroSection() {
 
       {/* Animated background elements */}
       <div className="absolute inset-0">
-        <motion.div
+        {/* <motion.div
           className="absolute w-4 h-4 bg-circuit-blue rounded-full opacity-60"
           style={{ top: "20%", left: "10%" }}
           animate={{ y: [-20, 0, -20] }}
@@ -43,7 +43,7 @@ export default function HeroSection() {
           style={{ top: "40%", right: "20%" }}
           animate={{ y: [-20, 0, -20] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        />
+        /> */}
         <motion.div
           className="absolute w-2 h-2 bg-dragon-gold rounded-full opacity-80"
           style={{ bottom: "40%", left: "25%" }}
