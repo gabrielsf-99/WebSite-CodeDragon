@@ -2,9 +2,14 @@
   "version": 2,
   "builds": [
     { "src": "dist/index.js", "use": "@vercel/node" },
-    { "src": "client/package.json", "use": "@vercel/static-build" }
+    { "src": "dist/public/**/*", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/dist/index.js" }
+    { "src": "/assets/(.*)", "dest": "dist/public/assets/$1" },
+    { "src": "/(.*\\.js)",    "dest": "dist/public/$1" },
+    { "src": "/(.*\\.css)",   "dest": "dist/public/$1" },
+    { "src": "/favicon.ico",  "dest": "dist/public/favicon.ico" },
+
+    { "src": "/(.*)",         "dest": "dist/index.js" }
   ]
 }
