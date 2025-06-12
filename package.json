@@ -6,7 +6,8 @@
   "scripts": {
     "build:server": "esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs --external:vite --external:rollup --external:@rollup/*",
     "build:client": "vite build",
-    "vercel-build": "npm run build:client && npm run build:server"
+    "clean": "rimraf dist",
+    "vercel-build": "npm run clean && npm run build:client && npm run build:server"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -94,6 +95,7 @@
     "esbuild": "^0.25.0",
     "esno": "^4.8.0",
     "postcss": "^8.4.47",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
